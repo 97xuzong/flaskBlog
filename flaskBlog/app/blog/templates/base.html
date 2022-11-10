@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}{% endblock title %}</title>
-<!--    <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/style.css') }}">-->
+    <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/buefy.min.css') }}">
     {% block extra_head_style %}{% endblock extra_head_style %}
 </head>
@@ -42,16 +42,47 @@
 
                         <template #end>
                             <b-navbar-item tag="div">
-                                <div class="buttons">
-                                    <a class="button is-primary">
-                                        <strong>Sign up</strong>
-                                    </a>
-                                    <a class="button is-light">
-                                        Log in
-                                    </a>
-                                </div>
+                            <!-- 判断用户是否已登录 -->
+                            {% if g.user %}
+                            <div class=" buttons">
+                                <!-- 获取用户信心 -->
+                                <a class="button is-primary">欢迎您 {{ g.user['username'] }}</a>
+                                <a class="button is-success">个人中心</a>
+                                <!-- 显示推出按钮 -->
+                                <a class="button is-danger" href="{{ url_for('auth.logout') }}">退出</a>
+                            </div>
+                            {% else %}
+                            <!-- 用户未登录，显示登录注册按钮 -->
+                            <div class="buttons">
+                                <a class="button is-primary" href="{{ url_for('auth.register') }}">
+                                    <strong>Sign up</strong>
+                                </a>
+                                <a class="button is-light" href="{{ url_for('auth.login') }}">Log in</a>
+                            </div>
+                            {% endif %}
                             </b-navbar-item>
                         </template>
+            <b-navbar-item tag="div">
+                <!-- 判断用户是否已登录 -->
+                {% if g.user %}
+                <div class=" buttons">
+                    <!-- 获取用户信心 -->
+                    <a class="button is-primary">欢迎您 {{ g.user['username'] }}</a>
+                    <a class="button is-success">个人中心</a>
+                    <!-- 显示推出按钮 -->
+                    <a class="button is-danger" href="{{ url_for('auth.logout') }}">退出</a>
+                </div>
+                {% else %}
+                <!-- 用户未登录，显示登录注册按钮 -->
+                <div class="buttons">
+                    <a class="button is-primary" href="{{ url_for('auth.register') }}">
+                        <strong>Sign up</strong>
+                    </a>
+                    <a class="button is-light" href="{{ url_for('auth.login') }}">Log in</a>
+                </div>
+                {% endif %}
+            </b-navbar-item>
+        </template>
                     </b-navbar>
                 </template>
                 {% endblock navbar %}

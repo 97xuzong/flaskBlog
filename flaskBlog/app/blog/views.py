@@ -9,6 +9,6 @@ bp = Blueprint("blog", __name__, url_prefix="/blog",
 
 
 @bp.route("/")
-def hello():
+def index():
     posts = [1,2,3,4,5,6]
     return render_template("base.html",posts=posts)
