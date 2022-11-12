@@ -5,6 +5,7 @@ from ..models import auth
 
 bp = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates", static_folder="../static")
 
+
 @bp.before_app_request
 def load_logged_in_user():
     # 每个请求之前都回去session中查看user_id来获取用户
@@ -13,6 +14,7 @@ def load_logged_in_user():
         g.user = None
     else:
         g.user = auth.User.query.get(int(user_id))
+
 
 @bp.route("/login", methods=['GET', 'POST'])
 def login():
