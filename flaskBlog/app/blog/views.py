@@ -1,4 +1,4 @@
-from flask import Blueprint,render_template
+from flask import Blueprint, render_template
 
 """
 # 蓝图就相当于一个子路由 与app共有一个父类  属于兄弟类
@@ -10,5 +10,5 @@ bp = Blueprint("blog", __name__, url_prefix="/blog",
 
 @bp.route("/")
 def index():
-    posts = [1,2,3,4,5,6]
-    return render_template("base.html",posts=posts)
+    posts = [1, 2, 3, 4, 5, 6]
+    return render_template("base.html", posts=posts)
