@@ -3,4 +3,30 @@
 # @File    : forms.py
 # @Time    : 2022/11/14 21:53
 # @Software: PyCharm
-# @function:
+# @function: 表单验证
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField
+from wtforms.validators import DataRequired, Length, ValidationError, EqualTo
+from werkzeug.security import check_password_hash
+from .models import User
+
+
+class LoginForm(FlaskForm):
+    """登录表单"""
+
+    username = StringField('username',
+                           validators=[DataRequired("不能为空"), Length(min=8, max=20, message="不符合长度要求")])
+    password = PasswordField("password", validators=[DataRequired("不能为空"),
+                                                     Length(min=10, max=20, message="密码长度不符合要求")])
+
+    def indentify_username(form, field):
+        user = User.query.filter_by(username=field.data).first()
+        if not user:
+            error = "改用户不存在"
+            raise ValidationError(error)
+        if check_password_hash(user.password,form.password.data):
+            raise ValidationError("密码不正确")
+
+
+class RegisterForm(FlaskForm):
+    pass
