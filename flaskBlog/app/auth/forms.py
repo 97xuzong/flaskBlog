@@ -29,4 +29,20 @@ class LoginForm(FlaskForm):
 
 
 class RegisterForm(FlaskForm):
-    pass
+    # 注册表单
+    username = StringField('username', validators=[
+        DataRequired(message="不能为空"),
+        Length(min=2, max=32, message="超过限制字数！")
+    ])
+    password = PasswordField('password', validators=[
+        DataRequired(message="不能为空"),
+        Length(min=2, max=32, message="超过限制字数！"),
+        EqualTo('password1', message='两次密码输入不一致！')
+    ])
+    password1 = PasswordField('password1')
+
+    def validate_username(form, field):
+        user = User.query.filter_by(username=field.data).first()
+        if user is not None:
+            error = '该用户名称已存在！'
+            raise ValidationError(error)
