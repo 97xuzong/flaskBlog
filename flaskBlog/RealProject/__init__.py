@@ -35,8 +35,10 @@ def create_app(test_config=None):
     # 注册蓝图对象
     from app.blog import bp as blog_bp
     from app.auth.views import bp as auth_bp
+    from app.admin.views import bp as admin_bp
     app.register_blueprint(blog_bp)
     app.register_blueprint(auth_bp)
+    app.register_blueprint(admin_bp)
     from app.blog import models
     from app.auth.models import auth
     return app

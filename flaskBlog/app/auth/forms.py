@@ -15,16 +15,16 @@ class LoginForm(FlaskForm):
     """登录表单"""
 
     username = StringField('username',
-                           validators=[DataRequired("不能为空"), Length(min=8, max=20, message="不符合长度要求")])
+                           validators=[DataRequired("不能为空"), Length(min=2, max=20, message="不符合长度要求")])
     password = PasswordField("password", validators=[DataRequired("不能为空"),
-                                                     Length(min=10, max=20, message="密码长度不符合要求")])
+                                                     Length(min=2, max=20, message="密码长度不符合要求")])
 
     def indentify_username(form, field):
         user = User.query.filter_by(username=field.data).first()
         if not user:
             error = "改用户不存在"
             raise ValidationError(error)
-        if check_password_hash(user.password,form.password.data):
+        if check_password_hash(user.password, form.password.data):
             raise ValidationError("密码不正确")
 
 
@@ -41,7 +41,7 @@ class RegisterForm(FlaskForm):
     ])
     password1 = PasswordField('password1')
 
-    def validate_username(form, field):
+    def indentify_username(form, field):
         user = User.query.filter_by(username=field.data).first()
         if user is not None:
             error = '该用户名称已存在！'

@@ -1,9 +1,24 @@
+import functools
+
 from flask import request, render_template, Flask, Blueprint, session, redirect, url_for, flash, g
 from werkzeug.security import generate_password_hash, check_password_hash
 from RealProject import db
 from ..models import auth
+from ..forms import LoginForm, RegisterForm
 
 bp = Blueprint('auth', __name__, url_prefix="/auth", template_folder="../templates", static_folder="../static")
+
+
+# 后台登录权限控制
+def login_required(view):
+    # 限制必须登录才能访问的页面装饰器
+    @functools.wraps(view)
+    def wrapped_view(**kwargs):
+        if g.user is None:
+            return redirect(url_for('auth.login'))
+        return view(**kwargs)
+
+    return wrapped_view
 
 
 @bp.before_app_request
@@ -16,49 +31,31 @@ def load_logged_in_user():
         g.user = auth.User.query.get(int(user_id))
 
 
-@bp.route("/login", methods=['GET', 'POST'])
+@bp.route('/login', methods=['GET', 'POST'])
 def login():
-    if request.method == "POST":
-        username = request.form.get("username")
-        password = request.form.get("password")
-        error = None
-        user = auth.User.query.filter_by(username=username).first()
-        if user is None:
-            error = "用户名错误"
-        elif not check_password_hash(user.password, password):
-            error = "密码错误"
-        if error is None:
-            session.clear()
-            session['user_id'] = user.id
-            return redirect(url_for("blog.index"))
-        flash(error)
-    return render_template("login.html")
+    # 登录视图
+    # form = LoginForm(meta={'csrf': False}) # 禁用csrf
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = auth.User.query.filter_by(username=form.username.data).first()
+        session.clear()
+        session['user_id'] = user.id
+        return redirect(url_for('blog.index'))
+    return render_template('login.html', form=form)
 
 
-@bp.route("/register", methods=['GET', 'POST'])
+@bp.route('/register', methods=['GET', 'POST'])
 def register():
     # 注册视图
-    if request.method == 'POST':
-        username = request.form['username']
-        password = request.form['password']
-        password1 = request.form['password1']
-
-        if password != password1:
-            flash('两次密码输入不一致！')
-            return redirect(url_for('auth.register'))
-
-        exists_user = auth.User.query.filter_by(username=username).first()
-        if exists_user:
-            flash('该用户名已经存在，请更换其他用户名！')
-            return redirect(url_for('auth.register'))
-        else:
-            user = auth.User(username=username, password=generate_password_hash(password))
-            db.session.add(user)
-            db.session.commit()
-            session.clear()
-            session['user_id'] = user.id
+    form = RegisterForm()
+    if form.validate_on_submit():
+        user = auth.User(username=form.username.data, password=generate_password_hash(form.password.data))
+        db.session.add(user)
+        db.session.commit()
+        session.clear()
+        session['user_id'] = user.id
         return redirect(url_for('blog.index'))
-    return render_template('register.html')
+    return render_template('register.html', form=form)
 
 
 @bp.route('/logout')
