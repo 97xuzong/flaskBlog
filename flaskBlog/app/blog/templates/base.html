@@ -7,41 +7,42 @@
     <title>{% block title %}{% endblock title %}</title>
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/style.css') }}">
     <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/buefy.min.css') }}">
+    <link rel="stylesheet" href="{{ url_for('blog.static', filename='css/materialdesignicons.min.css') }}">
     {% block extra_head_style %}{% endblock extra_head_style %}
 </head>
 
 <body>
-    <div id="app" style="height:100%;">
-        <div class="container is-fluid1" style="height:100%; ">
-            <div class="is-block" style="height:100%;">
-                <!-- 导航 -->
-                {% block navbar %}
-                <template>
-                    <b-navbar spaced shadow>
-                        <template #brand>
-                            <b-navbar-item>
-                                <img src="{{ url_for('blog.static', filename='img/甜美.jpg') }}" alt="FlaskBlog">
-                            </b-navbar-item>
-                        </template>
-                        <template #start>
+<div id="app" style="height:100%;">
+    <div class="container is-fluid1" style="height:100%; ">
+        <div class="is-block" style="height:100%;">
+            <!-- 导航 -->
+            {% block navbar %}
+            <template>
+                <b-navbar spaced shadow>
+                    <template #brand>
+                        <b-navbar-item>
+                            <img src="{{ url_for('blog.static', filename='img/甜美.jpg') }}" alt="FlaskBlog">
+                        </b-navbar-item>
+                    </template>
+                    <template #start>
+                        <b-navbar-item href=" {{url_for('blog.index')}} ">
+                            Home
+                        </b-navbar-item>
+                        <b-navbar-item href="#">
+                            Documentation
+                        </b-navbar-item>
+                        <b-navbar-dropdown label="Info">
                             <b-navbar-item href="#">
-                                Home
+                                About
                             </b-navbar-item>
                             <b-navbar-item href="#">
-                                Documentation
+                                Contact
                             </b-navbar-item>
-                            <b-navbar-dropdown label="Info">
-                                <b-navbar-item href="#">
-                                    About
-                                </b-navbar-item>
-                                <b-navbar-item href="#">
-                                    Contact
-                                </b-navbar-item>
-                            </b-navbar-dropdown>
-                        </template>
+                        </b-navbar-dropdown>
+                    </template>
 
-                        <template #end>
-                            <b-navbar-item tag="div">
+                    <template #end>
+                        <b-navbar-item tag="div">
                             <!-- 判断用户是否已登录 -->
                             {% if g.user %}
                             <div class=" buttons">
@@ -60,49 +61,50 @@
                                 <a class="button is-light" href="{{ url_for('auth.login') }}">Log in</a>
                             </div>
                             {% endif %}
-                            </b-navbar-item>
-                        </template>
+                        </b-navbar-item>
+                    </template>
                     <b-navbar-item tag="div">
-                <!-- 判断用户是否已登录 -->
-                {% if g.user %}
-                <div class=" buttons">
-                    <!-- 获取用户信心 -->
-                    <a class="button is-primary">欢迎您 {{ g.user['username'] }}</a>
-                    <a class="button is-success">个人中心</a>
-                    <!-- 显示推出按钮 -->
-                    <a class="button is-danger" href="{{ url_for('auth.logout') }}">退出</a>
+                        <!-- 判断用户是否已登录 -->
+                        {% if g.user %}
+                        <div class=" buttons">
+                            <!-- 获取用户信心 -->
+                            <a class="button is-primary">欢迎您 {{ g.user['username'] }}</a>
+                            <a class="button is-success" href="{{ url_for('admin.index') }}">个人中心</a>
+                            <!-- 显示推出按钮 -->
+                            <a class="button is-danger" href="{{ url_for('auth.logout') }}">退出</a>
+                        </div>
+                        {% else %}
+                        <!-- 用户未登录，显示登录注册按钮 -->
+                        <div class="buttons">
+                            <a class="button is-primary" href="{{ url_for('auth.register') }}">
+                                <strong>Sign up</strong>
+                            </a>
+                            <a class="button is-light" href="{{ url_for('auth.login') }}">Log in</a>
+                        </div>
+                        {% endif %}
+                    </b-navbar-item>
+
+                </b-navbar>
+            </template>
+            {% endblock navbar %}
+            <!-- 导航 end -->
+
+            {% block hero %}
+            <section class="hero is-medium is-primary">
+                <div class="hero-body">
+                    <p class="title">
+                        Large hero
+                    </p>
+                    <p class="subtitle">
+                        Large subtitle
+                    </p>
                 </div>
-                {% else %}
-                <!-- 用户未登录，显示登录注册按钮 -->
-                <div class="buttons">
-                    <a class="button is-primary" href="{{ url_for('auth.register') }}">
-                        <strong>Sign up</strong>
-                    </a>
-                    <a class="button is-light" href="{{ url_for('auth.login') }}">Log in</a>
-                </div>
-                {% endif %}
-            </b-navbar-item>
+            </section>
+            {% endblock hero %}
 
-                    </b-navbar>
-                </template>
-                {% endblock navbar %}
-                <!-- 导航 end -->
-
-                {% block hero %}
-                <section class="hero is-medium is-primary">
-                    <div class="hero-body">
-                        <p class="title">
-                            Large hero
-                        </p>
-                        <p class="subtitle">
-                            Large subtitle
-                        </p>
-                    </div>
-                </section>
-                {% endblock hero %}
-
-                {% block main %}
-                <div class="box is-marginless is-shadowless is-radiusless">
+            {% block main %}
+                {% block box %}
+                    <div class="box is-marginless is-shadowless is-radiusless">
                     <div class="columns is-multiline">
                         {% for post in posts %}
                         <div class="column is-4-fullhd">
@@ -110,13 +112,13 @@
                                 <div class="card-image">
                                     <figure class="image is-4by3">
                                         <img src="https://bulma.io/images/placeholders/1280x960.png"
-                                            alt="Placeholder image">
+                                             alt="Placeholder image">
                                     </figure>
                                 </div>
                                 <div class="card-content">
                                     <div class="media">
                                         <div class="media-content">
-                                            <p class="title is-4"><a href="">Flask博客实战 - 掌握增删改查</a> </p>
+                                            <p class="title is-4"><a href="">Flask博客实战 - 掌握增删改查</a></p>
                                         </div>
                                     </div>
 
@@ -137,45 +139,48 @@
                         <a class="pagination-previous is-disabled" title="This is the first page">Previous</a>
                         <a class="pagination-next">Next page</a>
                         <ul class="pagination-list">
-                          <li>
-                            <a class="pagination-link is-current" aria-label="Page 1" aria-current="page">1</a>
-                          </li>
-                          <li>
-                            <a class="pagination-link" aria-label="Goto page 2">2</a>
-                          </li>
-                          <li>
-                            <a class="pagination-link" aria-label="Goto page 3">3</a>
-                          </li>
+                            <li>
+                                <a class="pagination-link is-current" aria-label="Page 1" aria-current="page">1</a>
+                            </li>
+                            <li>
+                                <a class="pagination-link" aria-label="Goto page 2">2</a>
+                            </li>
+                            <li>
+                                <a class="pagination-link" aria-label="Goto page 3">3</a>
+                            </li>
                         </ul>
                     </nav>
                 </div>
-                {% endblock main %}
+                {% endblock box %}
+            {% endblock main %}
 
 
-
-                {% block footer %}
-                <div class="footer has-background-black-ter is-marginless">
-                    <div class="has-text-centered has-text-grey-light">
-                        © 2022 <a class="has-text-grey-light" href="http://www.lotdoc.cn/blog/topic/detail/6/">FlaskBlog博客实战</a> 版权所有 备案号：陕ICP备20005686号
-                    </div>
+            {% block footer %}
+            <div class="footer has-background-black-ter is-marginless">
+                <div class="has-text-centered has-text-grey-light">
+                    © 2022 <a class="has-text-grey-light"
+                              href="http://www.lotdoc.cn/blog/topic/detail/6/">FlaskBlog博客实战</a> 版权所有
+                    备案号：陕ICP备20005686号
                 </div>
-                {% endblock footer %}
             </div>
-
+            {% endblock footer %}
         </div>
-    </div>
 
-    <script src="{{ url_for('blog.static', filename='js/vue.js') }}"></script>
-    <script src="{{ url_for('blog.static', filename='js/buefy.min.js') }}"></script>
-    {% block extra_foot_script %}{% endblock extra_foot_script %}
-    <script>
+    </div>
+</div>
+
+<script src="{{ url_for('blog.static', filename='js/vue.js') }}"></script>
+<script src="{{ url_for('blog.static', filename='js/buefy.min.js') }}"></script>
+{% block extra_foot_script %}{% endblock extra_foot_script %}
+<script>
         var app = new Vue({
             el: '#app',
             data: {},
             methods: {}
         })
-    </script>
-    {% block vue_script %}{% endblock vue_script %}
+
+</script>
+{% block vue_script %}{% endblock vue_script %}
 </body>
 
 </html>

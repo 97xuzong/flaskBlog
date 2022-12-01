@@ -17,20 +17,25 @@
                     </p>
                     <ul class="menu-list">
                         <li><a class="{% if request.path == '/admin/' %}is-active{% endif %}"
-                            href="{{ url_for('admin.index') }}">主页</a></li>
+                               href="{{ url_for('admin.index') }}">主页</a></li>
                         <!-- <li><a>Customers</a></li> -->
                     </ul>
                     <p class="menu-label">
                         博客分类
                     </p>
                     <ul class="menu-list">
-                        <li><a href="">分类管理</a></li>
+                        <li><a class="{% if 'category' in request.path %}is-active{% endif %}"
+                               href="{{ url_for('admin.category') }}">分类管理</a></li>
                     </ul>
                     <p class="menu-label">
                         文章管理
                     </p>
                     <ul class="menu-list">
-                        <li><a href="">文章管理</a></li>
+                        <li><a class="{% if 'article' in request.path %}is-active{% endif %}"
+                        href="{{ url_for('admin.article') }}">文章管理</a></li>
+
+                        <li><a class="{% if 'tag' in request.path %}is-active{% endif %}"
+                        href="{{ url_for('admin.tag') }}">文章标签</a></li>
                     </ul>
                     <p class="menu-label">
                         用户管理
