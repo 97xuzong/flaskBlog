@@ -32,8 +32,6 @@ def create_app(test_config=None):
     # 实例化迁移实例
     migrate.init_app(app, db)
 
-
-
     # 注册蓝图对象
     from app.blog import bp as blog_bp
     from app.auth.views import bp as auth_bp

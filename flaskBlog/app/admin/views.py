@@ -6,11 +6,15 @@
 # @function: 后台视图
 
 from flask import Flask, Blueprint, request, url_for, redirect, render_template, flash
+from werkzeug.security import generate_password_hash
+from werkzeug.utils import secure_filename
 
-from .forms import CategoryForm, PostForm, TagForm
+from .forms import CategoryForm, PostForm, TagForm, CreateUserForm
+from ..auth.models import User
 from ..auth.views.register_login import login_required
-from RealProject import db
+from RealProject import db, BASE_DIR
 from ..blog.models import Category, Post, Tag
+import uuid
 
 bp = Blueprint("admin", __name__, url_prefix="/admin",
                static_folder="static", template_folder="templates")
@@ -29,7 +33,7 @@ def category():
     # 查看分类
     page = request.args.get('page', 1, type=int)
     # 分页处理
-    pagination = Category.query.order_by(-Category.add_date).paginate(page=page, per_page=5, error_out=False)
+    pagination = Category.query.order_by(-Category.add_date).paginate(page=page, per_page=6, error_out=False)
     category_list = pagination.items
     print("页对象的数据", category_list)
     return render_template('admin/category.html', category_list=category_list, pagination=pagination)
@@ -87,9 +91,11 @@ def article():
     # 查看分类
     page = request.args.get('page', 1, type=int)
     # 分页处理
-    pagination = Post.query.order_by(-Post.add_date).paginate(page=page, per_page=5, error_out=False)
+    pagination = Post.query.order_by(-Post.add_date).paginate(page=page, per_page=6, error_out=False)
     post_list = pagination.items
     print("页对象的数据", post_list)
+    for i in post_list:
+        print(type(i.tags[0]))
     return render_template('admin/article.html', post_list=post_list, pagination=pagination)
 
 
@@ -168,7 +174,7 @@ def article_del(post_id):
 def tag():
     page = request.args.get('page', 1, type=int)
     # 分页处理
-    pagination = Tag.query.order_by(-Tag.add_date).paginate(page=page, per_page=10, error_out=False)
+    pagination = Tag.query.order_by(-Tag.add_date).paginate(page=page, per_page=6, error_out=False)
     tag_list = pagination.items
     return render_template('admin/tag.html', tag_list=tag_list, pagination=pagination)
 
@@ -212,3 +218,104 @@ def tag_del(tag_id):
         db.session.commit()
         flash(f'{tag.name}删除成功')
         return redirect(url_for('admin.tag'))
+
+
+# ----------------------------用户管理-----------------------------------------
+
+@bp.route('/user')
+@login_required
+def user():
+    # 查看用户  列表
+    page = request.args.get('page', 1, type=int)
+    pagination = User.query.order_by(-User.add_date).paginate(page=page, per_page=6, error_out=False)
+    user_list = pagination.items
+    return render_template('admin/user.html', user_list=user_list, pagination=pagination)
+
+
+@bp.route('/user/add', methods=['GET', 'POST'])
+@login_required
+def user_add():
+    # 查看文章列表
+    # https://flask-wtf.readthedocs.io/en/1.0.x/form/#file-uploads
+    # from app.utils.uuid_func import upload_file_path
+    form = CreateUserForm()
+    if form.validate_on_submit():
+        f = form.avatar.data
+        save_path = BASE_DIR / f'app/admin/static/avatar' / f"{f.filename}"
+        # avatar_path, filename = upload_file_path('avatar', f)
+        f.save(save_path)
+        user = User(
+            username=form.username.data,
+            password=generate_password_hash(form.password.data),
+            avatar=f'avatar/{f.filename}',
+            is_super_user=form.is_super_user.data,
+            is_active=form.is_active.data,
+            is_staff=form.is_staff.data
+        )
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('admin.user'))
+    return render_template('admin/user_form.html', form=form)
+
+
+@bp.route('/user/edit/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def user_edit(user_id):
+    # 修改用户信息
+    user = User.query.get(user_id)
+
+    # from app.utils.uuid_func import upload_file_path
+    form = CreateUserForm(
+        username=user.username,
+        password=user.password,
+        avatar=user.avatar,
+        is_super_user=user.is_super_user,
+        is_active=user.is_active,
+        is_staff=user.is_staff
+    )
+    form.password.default = f'{user.password}'
+
+    if form.validate_on_submit():
+        user.username = form.username.data
+        if not form.password.data:
+            user.password = user.password
+        else:
+            user.password = generate_password_hash(form.password.data)
+        f = form.avatar.data
+        if user.avatar == f:
+            user.avatar = user.avatar
+        else:
+            # avatar_path, filename = upload_file_path('avatar', f)
+            avatar_path = BASE_DIR / f'app/admin/static/avatar' / f"{f.filename}"
+            filename = f.filename
+            f.save(avatar_path)
+            user.avatar = f'avatar/{filename}'
+        user.is_super_user = form.is_super_user.data
+        user.is_active = form.is_active.data
+        user.is_staff = form.is_staff.data
+        db.session.add(user)
+        db.session.commit()
+        return redirect(url_for('admin.user'))
+    flash("图片")
+    return render_template('admin/user_form.html', form=form, user=user)
+
+
+@bp.route('/user/del/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+def user_del(user_id):
+    # 删除用户
+    user = User.query.get(user_id)
+    if tag:
+        db.session.delete(user)
+        db.session.commit()
+        flash(f'{user.username}删除成功')
+        return redirect(url_for('admin.user'))
+
+
+# ---------------------密码修改-------------------------------
+
+@bp.route('/edit_pwd', methods=['GET', 'POST'])
+@login_required
+def edit_pwd():
+    flash("请前往用户管理页修改")
+    return redirect(url_for("admin.user"))
